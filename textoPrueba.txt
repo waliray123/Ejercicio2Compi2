@@ -1,0 +1,29 @@
+programa Programa1
+    procedimiento NOMBRE (id1)
+        NOMBRE2(id1);
+    end
+
+
+    procedimiento NOMBRE2 (id2)
+        NOMBRE3(id2);
+        NOMBRE4(id2);        
+    end
+
+
+    procedimiento NOMBRE3 (id3)
+        
+    end
+
+    procedimiento NOMBRE4 (id3)
+        
+    end
+
+
+    begin
+        x : integer;
+        y : integer;
+        x := NOMBRE(y);
+        NOMBRE2(3);
+        NOMBRE(1);
+    end
+end

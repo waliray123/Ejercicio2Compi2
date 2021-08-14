@@ -1,0 +1,158 @@
+package Analizadores;
+
+import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.util.List;
+import Analizadores.ErrorCom;
+import Objetos.Programa;
+import Objetos.Procedimiento;
+import Objetos.Instruccion;
+
+parser code {:
+
+    private List<ErrorCom> erroresCom;  
+    private Programa programa;
+    private Procedimiento procedimientoAct;
+    private Instruccion instruccionAct;
+
+	public ParserCompilar(LexerCompilar lex) {
+		super(lex);        
+        this.erroresCom = lex.getErroresCom();    
+	}
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintactico.
+     **/ 
+    public void syntax_error(Symbol s){ 
+        erroresCom.add(new ErrorCom("Sintactico","No se esperaba Componente",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    }
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintáctico 
+     * en el que ya no es posible una recuperación de errores.
+     **/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        erroresCom.add(new ErrorCom("Sintactico","Error sintactico Irrecuperable",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    }         
+    /*---------Getters & Setters---------*/
+
+    public List<ErrorCom> getErroresCom(){
+        return this.erroresCom;
+    }
+
+    public Programa getPrograma(){
+        return this.programa;
+    }
+
+    private void crearPrograma(String nombre){
+        this.programa = new Programa();
+        this.programa.setNombre(nombre);
+    }
+
+    private void crearProcedimiento(String nombre){
+        this.procedimientoAct = new Procedimiento();
+        this.procedimientoAct.setNombre(nombre);      
+        this.programa.insertarProcedimiento(this.procedimientoAct);           
+    }
+
+    private void agregarParamProc(String val){
+        this.procedimientoAct.insertarParametro(val);
+    }    
+
+    private void agregarInstruccionProc(String nomb){
+        this.instruccionAct = new Instruccion();
+        instruccionAct.setTipo("funcion");
+        instruccionAct.setEsAsgFun(true);
+        instruccionAct.setFuncion(nomb);
+        this.procedimientoAct.insertarInstruccion(this.instruccionAct);
+    }
+
+    private void insertarParamInstruccion(String val){
+        this.instruccionAct.insertarParametro(val);
+    }
+
+    private void insertarAsignacion(String tipo, String nombre){
+        this.instruccionAct = new Instruccion();        
+        this.instruccionAct.setVariable(nombre);
+        instruccionAct.setTipo(tipo);        
+        if(tipo.equals("funcion")){
+            this.instruccionAct.setEsAsgFun(true);
+        }
+        this.programa.insertarInstruccion(this.instruccionAct);
+    }
+
+    private void insertarFuncionInstruccion2(String nomb){
+        this.instruccionAct = new Instruccion(); 
+        instruccionAct.setTipo("funcion");
+        this.instruccionAct.setFuncion(nomb);
+        this.instruccionAct.setEsAsgFun(true);
+        this.programa.insertarInstruccion(this.instruccionAct);
+    }
+
+    private void insertarFuncionInstruccion(String nomb){
+        this.instruccionAct.setFuncion(nomb);
+        this.instruccionAct.setEsAsgFun(true);
+    }
+
+    private void insertarValInstruccion(String val){
+        this.instruccionAct.insertarValor(val);
+    }    
+:}
+
+/* Terminals (tokens returned by the scanner). */
+terminal 	    PROGRAMA,PROCEDIMIENTO,END,INTEGER,PARI,PARD,DOSPUNT,PUNTCOMA,COMA,IGUAL,BEGIN;
+terminal String ID,NUM;
+
+
+
+/* Non-Terminals (created scanner). */
+non terminal  inicio,sig,sig2,sig3,param,paramp,param2p,param2;
+
+
+/* The grammar : */
+
+start with inicio;
+
+inicio ::= 
+        PROGRAMA ID:nom {:crearPrograma(nom);:} sig END
+;
+
+sig ::=
+        PROCEDIMIENTO ID:nom {:crearProcedimiento(nom);:} PARI param PARD sig2 END sig
+    |   BEGIN sig3 END
+;
+
+param ::=
+        ID:val {:agregarParamProc(val);:} paramp
+;
+
+paramp ::=
+        COMA ID:val {:agregarParamProc(val);:} paramp
+    |   
+;
+
+param2 ::=
+        ID:val {:insertarParamInstruccion(val);:} param2p
+    |   NUM:val {:insertarParamInstruccion(val);:} param2p
+    |
+;
+
+param2p ::=
+        COMA ID:val {:insertarParamInstruccion(val);:} param2p
+    |   COMA NUM:val {:insertarParamInstruccion(val);:} param2p
+    |
+;
+
+sig2 ::=
+        ID:nomb {:agregarInstruccionProc(nomb);:} PARI param2 PARD PUNTCOMA sig2
+    |   
+;
+
+sig3 ::=
+        ID:nom DOSPUNT INTEGER PUNTCOMA {:insertarAsignacion("declaracion",nom);:} sig3
+    |   ID:nom DOSPUNT IGUAL ID:nom2 {:insertarAsignacion("asgFunc",nom);insertarFuncionInstruccion(nom2);:} PARI param2 PARD PUNTCOMA sig3
+    |   ID:nom DOSPUNT IGUAL NUM:val {:insertarAsignacion("asignacion",nom);insertarValInstruccion(val);:} PUNTCOMA
+    |   ID:nom DOSPUNT IGUAL ID:val {:insertarAsignacion("asignacion",nom);insertarValInstruccion(val);:} PUNTCOMA
+    |   ID:nom PARI {:insertarFuncionInstruccion2(nom);:} param2 PARD PUNTCOMA sig3
+    |   
+;

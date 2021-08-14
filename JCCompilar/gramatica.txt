@@ -1,0 +1,19 @@
+
+inicio -> PROGRAMA ID sig END
+
+sig ->  PROCEDIMIENTO ID PARI param PARD sig2 END sig
+    |   BEGIN sig3 END
+
+param -> ID paramp
+
+paramp -> COMA ID paramp
+    |   
+
+sig2 ->  ID PARI PARD PUNTCOMA
+    |   
+
+sig3 -> ID DOSPUNT INTEGER PUNTCOMA sig3
+    |   ID DOSPUNT IGUAL ID PARI param PARD PUNTCOMA sig3
+    |   PARI param PARD PUNTCOMA sig3
+    |   
+

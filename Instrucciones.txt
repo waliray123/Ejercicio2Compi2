@@ -1,0 +1,8 @@
+Se puede compilar en el IDE netbeans asi como en la mayoria de IDES que compilen java
+
+Al compilar el programa debe ingresar el codigo sin errores para que este no muestre errores
+Se adjunta un archivo de prueba para demostrar parte de la gramatica.
+
+Si la imagen no se actualiza buscar dentro del proyecto en la carpeta src/main/java/resources
+La imagen se llama arbol.png
+
